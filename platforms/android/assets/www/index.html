@@ -38,7 +38,74 @@
     -->
     <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; style-src 'self' 'unsafe-inline'; media-src *" /> -->
 
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <!--   <link rel="stylesheet" type="text/css" href="css/index.css" /> -->
+    <link rel="stylesheet" type="text/css" href="js/lib/xui-2.3.2.css" />
+    <script type="text/javascript">
+
+var downloadDirectory;
+document.addEventListener("deviceready", onDeviceReady,
+true);
+
+function onDeviceReady() {
+ window.requestFileSystem(
+Filesystems, Storage, and Local Databases
+LocalFileSystem.PERSISTENT,
+ 0,
+ onFileSystemSuccess,
+ null);
+ x$('#download_btn').on( 'click', function(e) {
+ download();
+ });
+}
+//Juan: esta funcion te trae el directorio
+function onFileSystemSuccess(fileSystem) {
+ fileSystem.root.getDirectory('my_downloads',
+ {create:true},
+ function(dir) {
+ downloadDirectory = dir;
+ },fail);
+}
+
+//funcion de la api para descargar
+function download() {
+ var fileURL =
+document.getElementById('file_url').value;
+ var localFileName = getFilename(fileURL);
+ x$('#message').html('Downloading ' + localFileName);
+ var fileTransfer = new FileTransfer();
+ fileTransfer.download(
+ fileURL,
+ downloadDirectory.fullPath + '/' + localFileName,
+ function(entry){
+ x$('#message').html('Download complete. File
+saved to: ' + entry.fullPath);
+ },
+ function(error){
+ alert("Download error source " +
+JSON.stringify(error));
+ }
+ );
+}
+
+//funcion custom para optener los datos de la cancion a descargar
+function getFilename(url) {
+ if (url) {
+ var m = url.toString().match(/.*\/(.+?)\./);
+ if (m && m.length > 1) {
+ return m[1] + '.' + url.split('.').pop();
+ }
+ }
+ return "";
+}
+
+//finalmente la funcion de error
+function fail(error) {
+ $('#message').html('We encountered a problem: ' +
+error.code);
+}
+
+
+</script>
     <title>Hello World</title>
 </head>
 
@@ -48,6 +115,11 @@
         <div id="deviceready" class="blink">
             <p class="event listening">Connecting to Device</p>
             <p class="event received">Device is Ready</p>
+
+<input type="text" id="file_url" value="" />
+ <input type="button" id="download_btn" value="Download"/>
+ <div id="message"></div>
+
         </div>
     </div>
     <script type="text/javascript" src="cordova.js"></script>
